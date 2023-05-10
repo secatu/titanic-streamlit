@@ -147,7 +147,7 @@ def main():
 
   
     #Graficas
-    print_plots(df)
+    #print_plots(df)
     
 
     # Matriz de correlación

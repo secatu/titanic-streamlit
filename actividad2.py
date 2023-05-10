@@ -60,20 +60,6 @@ def print_plots(df):
         g2.set(ylabel="Número de personas", xlabel="", xticklabels=["Fallecidos", "Supervivientes"])
         st.pyplot(fig2)
 
-    col3, col4 = st.columns(2)
-
-    with col3:
-        st.write("Boxplot con relación entre edad y Género")
-        fig3 = plt.figure(figsize=(5, 4))
-        g3 = sns.boxplot(data=df, y='Edad', x='Genero')
-        st.pyplot(fig3)
-
-    with col4:
-        st.write("Boxplot con relación entre tarifa y Género")
-        fig4 = plt.figure(figsize=(5, 4))
-        g4 = sns.boxplot(data=df, y='Tarifa', x='Genero')
-        st.pyplot(fig4)
-
 
 def main():
     st.title('Titanic dataset')
@@ -147,7 +133,7 @@ def main():
 
   
     #Graficas
-    #print_plots(df)
+    print_plots(df)
     
 
     # Matriz de correlación
@@ -193,8 +179,7 @@ def main():
 
     if st.sidebar.button('Realizar predicción'):
         row = [[age_prediction, embarked_prediction, fare_prediction, parch_prediction, class_prediction, genre_prediction,sibsp_prediction]]
-        prueba = pd.DataFrame(row, columns=['Edad', 'Embarque', 'Tarifa', 'Parch', 'Clase', 'Genero', 'SibSp']) 
-        st.dataframe(prueba)
+        prueba = pd.DataFrame(row, columns=['Edad', 'Embarque', 'Tarifa', 'Parch', 'Clase', 'Genero', 'SibSp'])
 
         continuous = ['Edad', 'Tarifa', 'Parch', 'Clase', 'SibSp']
         scaler = StandardScaler()

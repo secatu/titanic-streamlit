@@ -48,7 +48,7 @@ def print_plots(df):
     with col1:
         st.write("Número de supervivientes y fallecidos")
         fig1 = plt.figure(figsize=(5, 4))
-        g1 = sns.countplot(x='Survived', data=df);
+        g1 = sns.countplot(x='Sobrevivio', data=df);
         g1.set(ylabel="Número de personas", xlabel="")
         st.pyplot(fig1)
 

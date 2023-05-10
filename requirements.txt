@@ -3,6 +3,5 @@ matplotlib
 numpy
 pandas
 streamlit
-base64
 seaborn
 keras

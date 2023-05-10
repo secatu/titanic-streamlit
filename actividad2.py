@@ -49,7 +49,7 @@ def print_plots(df):
         st.write("Número de supervivientes y fallecidos")
         fig1 = plt.figure(figsize=(5, 4))
         g1 = sns.countplot(df['Sobrevivio'])
-        g1.set(ylabel="Número de personas", xlabel="", xticklabels=["Fallecidos", "Supervivientes"]) # "0=Died", "1=Sobrevivio"
+        g1.set(ylabel="Número de personas", xlabel="")
         st.pyplot(fig1)
 
     with col2:
@@ -57,7 +57,7 @@ def print_plots(df):
         fig2 = plt.figure(figsize=(5, 4))
         g2 = sns.countplot(x='Sobrevivio', data=df, hue = df['Clase'])
         plt.legend(loc='upper right')
-        g2.set(ylabel="Número de personas", xlabel="", xticklabels=["Fallecidos", "Supervivientes"])
+        g2.set(ylabel="Número de personas", xlabel="")
         st.pyplot(fig2)
 
 

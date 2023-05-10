@@ -212,7 +212,6 @@ def main():
             cadena = "Falleció con una probabilidad de " + str(predicted_formated) + " %"
 
         hola.header(cadena)
-        st.sidebar.title(cadena)
     
 
     

@@ -4,7 +4,6 @@ import numpy as np
 import base64
 import matplotlib.pyplot as plt
 import seaborn as sns
-import pickle
 from sklearn.preprocessing import StandardScaler
 from keras.models import load_model
 

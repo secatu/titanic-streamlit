@@ -6,3 +6,4 @@ streamlit
 seaborn
 keras
 tensorflow
+scikeras

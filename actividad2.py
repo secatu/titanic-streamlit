@@ -4,18 +4,23 @@ import numpy as np
 import base64
 import matplotlib.pyplot as plt
 import seaborn as sns
+import pickle
 from sklearn.preprocessing import StandardScaler
 from keras.models import load_model
 
 def load_dataset(rename=True):
     df = pd.read_csv('assets/dataset.csv', sep=";")
-    #Elimino valores nulos
     df = df.dropna(how='any',axis=0)
-    if(rename):
-        #Cambio nombre de las columnas a español para los gráficos
-        df.rename(columns={'Age': 'Edad', 'Embarked': 'Embarque', 'Fare': 'Tarifa', 
-                       'Sex':'Genero', 'Survived':'Sobrevivio', 'Pclass':'Clase'}, inplace=True)
-        df.reset_index(drop=True, inplace=True)
+    
+    df.rename(columns={'Age': 'Edad', 'Cabin': 'Cabina', 'Embarked': 'Embarque', 'Fare': 'Tarifa', 
+                       'Sex':'Genero', 'Name':'Nombre', 'Survived':'Sobrevivio', 'Pclass':'Clase'}, inplace=True)
+    df = df.replace({'Genero' : { 'male' : 'hombre', 'female' : 'mujer'}})
+    df = df.replace({'Embarque' : { 'C' : 'Cherbourg', 'Q' : 'Queenstown', 'S': 'Southampton'}})
+    df = df.replace({'Clase' : { 1 : 'Primera', 2 : 'Segunda', 3: 'Tercera'}})
+    df = df.replace({'Sobrevivio' : { 1 : 'Si', 0 : 'No'}})
+
+    df.reset_index(drop=True, inplace=True)
+
     return df
 
 def download_file(df):
@@ -79,11 +84,11 @@ def main():
     st.title('Titanic dataset')
 
     #Cargar modelo
-    model = load_model('assets/ultimo.h5')
+    with open('assets/modelo.pickle', 'rb') as file:
+        model = pickle.load(file)
 
     #Cargar dataset
     df = load_dataset()
-    
 
     # Sidebar - filtros
     st.sidebar.header('Filtros')
@@ -91,50 +96,42 @@ def main():
     # Filtro clase
     pclass = ['Primera', 'Segunda', 'Tercera']
     selected_class = st.sidebar.multiselect('Clase', pclass, pclass)
-    classes = {"Primera": 1, "Segunda": 2, "Tercera": 3}
-
-    final_selection = []
-    for i in selected_class:
-        final_selection.append(classes[i])
-
-    if(len(final_selection) == 0):
-        final_selection = [1,2,3]
+    if(len(selected_class) == 0):
+        selected_class = pclass
 
     # Sidebar - Filtro genero
-    genre = ['female', 'male']
+    genre = ['mujer', 'hombre']
     selected_genre = st.sidebar.multiselect('Género', genre, genre)
 
     if(len(selected_genre) == 0):
-        selected_genre = ['female', 'male']
+        selected_genre = ['mujer', 'hombre']
 
     # Sidebar - Filtro edad
-    values = st.sidebar.slider('Edad', 0, 100, (0, 100))
+    age_values = st.sidebar.slider('Edad', 0, 100, (0, 100))
+
+    # Sidebar - Filtro Tarifa
+    tarifa_values = st.sidebar.slider('Tarifa', 0, 600, (0, 600))
 
     # Sidebar - Filtro embarcacion
     embarked_list = ['Cherbourg', 'Queenstown', 'Southampton']
     selected_embarked = st.sidebar.multiselect('Lugar de embarcacion', embarked_list, embarked_list)
-    embarked_dict = {"Cherbourg": 'C', "Queenstown": 'Q', "Southampton": 'S'}
+    if(len(selected_embarked) == 0):
+        selected_embarked = embarked_list
 
-    final_embarked = []
-    for i in selected_embarked:
-        final_embarked.append(embarked_dict[i])
+    # Sidebar - Filtro sobrevivio
+    sobrevivio_list = ['Si', 'No']
+    selected_sobrevivio = st.sidebar.multiselect('¿Sobrevivió?', sobrevivio_list, sobrevivio_list)
+    if(len(selected_sobrevivio) == 0):
+        selected_sobrevivio = sobrevivio_list
 
-    if(len(final_embarked) == 0):
-        final_embarked = ['C', 'Q', 'S']
-
-
-    df = df[(df.Clase.isin(final_selection))]
-    df = df[(df.Embarque.isin(final_embarked))]
-    df = df[(df.Edad > values[0]) & (df.Edad < values[1])]
+    df = df[(df.Clase.isin(selected_class))]
+    df = df[(df.Embarque.isin(selected_embarked))]
+    df = df[(df.Sobrevivio.isin(selected_sobrevivio))]
+    df = df[(df.Edad > age_values[0]) & (df.Edad < age_values[1])]
+    df = df[(df.Tarifa > tarifa_values[0]) & (df.Tarifa < tarifa_values[1])]
     df = df[(df.Genero.isin(selected_genre))]
 
     df.reset_index(drop=True, inplace=True)
-
-
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Pasajeros totales", df.shape[0])
-    col2.metric("Sobrevivieron", df[(df.Sobrevivio == 1)].shape[0])
-    col3.metric("Fallecieron", df[(df.Sobrevivio == 0)].shape[0])
 
 
     st.dataframe(df, height=315)
@@ -150,13 +147,15 @@ def main():
     print_plots(df)
     
 
+    
     # Matriz de correlación
+    st.write("Matriz de correlación")
     #Transformar variables categoricas en numericas
-    df2 = load_dataset(rename=False)
-    stacked = df2[['Embarked','Sex']].stack()
-    df2[['Embarked','Sex']] = pd.Series(stacked.factorize()[0], index=stacked.index).unstack()
+    df2 = load_dataset()
+    stacked = df2[['Embarque', 'Genero', 'Clase', 'Sobrevivio']].stack()
+    df2[['Embarque', 'Genero', 'Clase', 'Sobrevivio']] = pd.Series(stacked.factorize()[0], index=stacked.index).unstack()
     #Elimino las variables Cabin, Name, Ticket y PassengerId ya que no son útiles para la creación de la red neuronal
-    df2.drop(['Cabin', 'Name', 'Ticket', 'PassengerId'], axis=1, inplace=True)
+    df2.drop(['Cabina', 'Nombre', 'Ticket', 'PassengerId'], axis=1, inplace=True)
 
     corr = df2.corr()
     mask = np.zeros_like(corr)
@@ -168,8 +167,9 @@ def main():
     
 
     #PREDICCIONES
+    st.sidebar.subheader('')
     st.sidebar.subheader('Realizar predicción')
-    hola = st.sidebar.header('')
+    prediction_result = st.sidebar.header('')
     
     age_prediction = st.sidebar.number_input('Edad', step=1, min_value = 0)
 
@@ -179,7 +179,7 @@ def main():
 
     fare_prediction = st.sidebar.number_input('Tarifa del pasajero')
 
-    parch_prediction = st.sidebar.number_input('Número de padres/hijos a bordo', step=1, min_value=0)
+    parch_prediction = st.sidebar.number_input('Número de padres / hijos a bordo', step=1, min_value=0)
 
     class_list = st.sidebar.selectbox('Clase',('Primera', 'Segunda', 'Tercera'))
     class_dict = {"Primera": 1, "Segunda": 2, "Tercera": 3}
@@ -193,7 +193,7 @@ def main():
 
     if st.sidebar.button('Realizar predicción'):
         row = [[age_prediction, embarked_prediction, fare_prediction, parch_prediction, class_prediction, genre_prediction,sibsp_prediction]]
-        prueba = pd.DataFrame(row, columns=['Edad', 'Embarque', 'Tarifa', 'Parch', 'Clase', 'Genero', 'SibSp'])
+        prueba = pd.DataFrame(row, columns=['Edad', 'Embarque', 'Tarifa', 'Parch', 'Clase', 'Genero', 'SibSp']) 
 
         continuous = ['Edad', 'Tarifa', 'Parch', 'Clase', 'SibSp']
         scaler = StandardScaler()
@@ -203,18 +203,14 @@ def main():
             prueba[var] = scaler.fit_transform(prueba[var].values.reshape(-1, 1))
     
         predicted = model.predict(prueba)
-        predicted_formated = round(float(predicted[0]),4) * 100
+        predicted = round((predicted[0][0] * 100), 2)
 
-        if(predicted[0] > 0.5):
-            cadena = "Sobrevivió con una probabilidad de " + str(predicted_formated) + " %"
+        if(predicted > 50):
+            text_result = "Sobrevivió con una probabilidad de " + str(predicted) + " %"
         else:
-            cadena = "Falleció con una probabilidad de " + str(predicted_formated) + " %"
+            text_result = "Falleció con una probabilidad de " + str(predicted) + " %"
 
-        hola.header(cadena)
-    
-
-    
-
+        prediction_result.header(text_result)
 
 main()
 

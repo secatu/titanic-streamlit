@@ -59,6 +59,20 @@ def print_plots(df):
         plt.legend(loc='upper right')
         g2.set(ylabel="Número de personas", xlabel="")
         st.pyplot(fig2)
+        
+    col3, col4 = st.columns(2)
+
+    with col3:
+        st.write("Boxplot con relación entre edad y Género")
+        fig3 = plt.figure(figsize=(5, 4))
+        g3 = sns.boxplot(data=df, y='Edad', x='Genero')
+        st.pyplot(fig3)
+
+    with col4:
+        st.write("Boxplot con relación entre tarifa y Género")
+        fig4 = plt.figure(figsize=(5, 4))
+        g4 = sns.boxplot(data=df, y='Tarifa', x='Genero')
+        st.pyplot(fig4)
 
 
 def main():

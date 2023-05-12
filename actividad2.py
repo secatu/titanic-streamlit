@@ -79,6 +79,62 @@ def print_plots(df):
         g4 = sns.boxplot(data=df, y='Tarifa', x='Genero')
         st.pyplot(fig4)
 
+    col5, col6 = st.columns(2)
+
+    with col5:
+        st.write("Relación embarque y fallecidos")
+        fig2 = plt.figure(figsize=(5, 4))
+        g2 = sns.countplot(x='Sobrevivio', data=df, hue = df['Embarque'])
+        plt.legend(loc='upper right')
+        g2.set(ylabel="Número de personas", xlabel="")
+        st.pyplot(fig2)
+
+    with col6:
+        st.write("Relación embarque y género")
+        fig2 = plt.figure(figsize=(5, 4))
+        g2 = sns.countplot(x='Embarque', data=df, hue = df['Genero'])
+        plt.legend(loc='upper right')
+        g2.set(ylabel="Número de personas", xlabel="")
+        st.pyplot(fig2)
+
+    col7, col8 = st.columns(2)
+
+    with col7:
+        st.write("Relación número hijos/padres y fallecidos")
+        fig2 = plt.figure(figsize=(5, 4))
+        g2 = sns.countplot(x='Sobrevivio', data=df, hue = df['Parch'])
+        plt.legend(loc='upper right')
+        g2.set(ylabel="Número de personas", xlabel="")
+        st.pyplot(fig2)
+
+    with col8:
+        st.write("Relación número hermanos/conyugues y fallecidos")
+        fig2 = plt.figure(figsize=(5, 4))
+        g2 = sns.countplot(x='Sobrevivio', data=df, hue = df['SibSp'])
+        plt.legend(loc='upper right')
+        g2.set(ylabel="Número de personas", xlabel="")
+        st.pyplot(fig2)
+
+    col9, col10 = st.columns(2)
+
+    with col9:
+
+        st.write("Relación edad y tarifa")
+        fig2 = plt.figure(figsize=(5, 4))
+        g2 = plt.scatter(x=df["Edad"], y=df['Tarifa'], alpha=0.1)
+        plt.xlabel("Edad")
+        plt.ylabel('Tarifa')
+        st.pyplot(fig2)
+
+    with col10:
+        
+        st.write("Relación tarifa y clase")
+        fig2 = plt.figure(figsize=(5, 4))
+        g2 = plt.scatter(x=df["Clase"], y=df['Tarifa'], alpha=0.1)
+        plt.xlabel("Clase")
+        plt.ylabel('Tarifa')
+        st.pyplot(fig2)
+
 
 def main():
     st.title('Titanic dataset')
@@ -132,6 +188,11 @@ def main():
     df = df[(df.Genero.isin(selected_genre))]
 
     df.reset_index(drop=True, inplace=True)
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Pasajeros totales", df.shape[0])
+    col2.metric("Sobrevivieron", df[(df.Sobrevivio == 'Si')].shape[0])
+    col3.metric("Fallecieron", df[(df.Sobrevivio == 'No')].shape[0])
 
 
     st.dataframe(df, height=315)
@@ -206,11 +267,12 @@ def main():
         predicted = round((predicted[0][0] * 100), 2)
 
         if(predicted > 50):
-            text_result = "Sobrevivió con una probabilidad de " + str(predicted) + " %"
+            cadena = "Sobrevivió con una probabilidad de " + str(predicted) + " %"
         else:
-            text_result = "Falleció con una probabilidad de " + str(predicted) + " %"
+            cadena = "Falleció con una probabilidad de " + str(predicted) + " %"
 
-        prediction_result.header(text_result)
+        prediction_result.header(cadena)
+    
 
 main()
 
